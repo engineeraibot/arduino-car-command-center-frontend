@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Arrow Key Sender</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    html, body { height: 100%; margin: 0; font-family: system-ui, sans-serif; }
+    .wrap { display: grid; place-items: center; height: 100%; }
+    .card { padding: 24px 28px; border: 1px solid #ddd; border-radius: 14px; }
+    .status { margin-top: 12px; font-size: 14px; color: #555; }
+    kbd { background: #f2f2f2; border: 1px solid #ccc; border-bottom-width: 3px; border-radius: 6px; padding: 2px 6px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Press an arrow key</h1>
+      <p><kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd></p>
+      <div class="status" id="status">Waiting for input…</div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "http://localhost:8082/direction";
+    const statusEl = document.getElementById("status");
+
+    const keyToDirection = {
+      ArrowUp: "UP",
+      ArrowDown: "DOWN",
+      ArrowLeft: "LEFT",
+      ArrowRight: "RIGHT",
+    };
+
+    async function send(direction, action) {
+      const payload = `${direction}_${action}`;
+      statusEl.textContent = `Sending: ${payload}…`;
+
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ event: payload }),
+        });
+
+        if (!res.ok) throw new Error(`Server responded ${res.status}`);
+        statusEl.textContent = `Sent: ${payload}`;
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent = `Error: ${err.message}`;
+      }
+    }
+
+    window.addEventListener("keydown", (e) => {
+      if (e.repeat) return; // avoid flooding
+      const dir = keyToDirection[e.key];
+      if (dir) send(dir, "PRESSED");
+    });
+
+    window.addEventListener("keyup", (e) => {
+      const dir = keyToDirection[e.key];
+      if (dir) send(dir, "RELEASED");
+    });
+  </script>
+</body>
+</html>

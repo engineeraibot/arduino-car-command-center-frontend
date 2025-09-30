@@ -39,8 +39,8 @@
       try {
         const res = await fetch(API_URL, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ event: payload }),
+          headers: { "Content-Type": "text/plain" },
+          body: payload,
         });
 
         if (!res.ok) throw new Error(`Server responded ${res.status}`);

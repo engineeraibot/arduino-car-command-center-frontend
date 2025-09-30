@@ -6,14 +6,62 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     html, body { height: 100%; margin: 0; font-family: system-ui, sans-serif; }
-    .wrap { display: grid; place-items: center; height: 100%; }
+    .wrap { display: grid; place-items: center; height: 100%; gap: 16px; }
     .card { padding: 24px 28px; border: 1px solid #ddd; border-radius: 14px; }
     .status { margin-top: 12px; font-size: 14px; color: #555; }
     kbd { background: #f2f2f2; border: 1px solid #ccc; border-bottom-width: 3px; border-radius: 6px; padding: 2px 6px; }
+
+    /* Small video container (visual size 240×360) */
+    .video-shell {
+      width: 240px;       /* visual width after scaling */
+      height: 360px;      /* visual height after scaling */
+      position: relative;
+      overflow: hidden;
+      border-radius: 12px;
+      box-shadow: 0 2px 16px rgba(0,0,0,.06);
+    }
+
+    /* This wrapper scales the already-correctly-positioned rotated video */
+    .video-scale {
+      position: absolute;
+      inset: 0;
+      width: 480px;       /* unscaled portrait size (after rotation) */
+      height: 720px;
+      transform: scale(0.5);          /* 480×720 → 240×360 visually */
+      transform-origin: top left;
+    }
+
+    /* Inside, keep the original working rotate + translate */
+    .video-rot {
+      position: absolute;
+      top: 0; left: 0;
+      width: 720px;       /* native stream size */
+      height: 480px;
+      transform: rotate(90deg) translateY(-100%);
+      transform-origin: top left;
+    }
+
+    .video-rot iframe {
+      display: block;
+      width: 720px;
+      height: 480px;
+      border: 0;
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
+    <div class="video-shell">
+      <div class="video-scale">
+        <div class="video-rot">
+          <iframe
+            src="http://192.168.1.56:8080/video"
+            allow="autoplay; picture-in-picture"
+          ></iframe>
+        </div>
+      </div>
+    </div>
+
     <div class="card">
       <h1>Press an arrow key</h1>
       <p><kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd></p>
